@@ -1,4 +1,5 @@
-import { EngineClient, Locale, ServerTemplateConfiguration, } from '@bitzonegaming/roleplay-engine-sdk';
+import { EngineClient, Locale } from '@bitzonegaming/roleplay-engine-sdk';
+import { ServerTemplateConfigType } from '@bitzonegaming/roleplay-engine-sdk/template/models/server-template-config-type';
 
 import { createEngineClient, createGamemodeClient, SessionContext } from '../context/context';
 import { GamemodeClient } from '../../gamemode/client';
@@ -12,7 +13,7 @@ import { ServerConfiguration } from '../server/server-configuration';
 import { ScreenEvents } from './events/events';
 import { ScreenType } from './screen-type';
 import { TemplateLocalization, TemplateTextLocalization } from './template-localization';
-import { TemplateConfiguration } from './template-configuration';
+import { TemplateConfig, TemplateConfiguration } from './template-configuration';
 
 export interface ScreenSettings<
   TLocalization extends TemplateTextLocalization,
@@ -194,13 +195,13 @@ export abstract class Screen<
     this._serverConfiguration = init.serverConfiguration;
     this._locales = init.locales;
     this._defaultLocale = init.defaultLocale;
-    this._templateConfiguration = init.templateConfiguration.reduce(
-      (acc, config) => {
-        acc[config.key] = config;
-        return acc;
-      },
-      {} as Record<string, ServerTemplateConfiguration>,
-    ) as TTemplateConfiguration;
+    this._templateConfiguration = init.templateConfiguration.reduce((acc, config) => {
+      acc[config.key] = {
+        type: config.type,
+        value: config.value,
+      } as TemplateConfig<ServerTemplateConfigType>;
+      return acc;
+    }, {} as TemplateConfiguration) as TTemplateConfiguration;
     await this.onInit();
   }
 }
