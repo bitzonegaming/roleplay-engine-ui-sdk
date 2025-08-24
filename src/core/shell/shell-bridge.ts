@@ -1,15 +1,8 @@
-import {
-  ServerTemplateConfiguration,
-  TemplateTextTranslation,
-} from '@bitzonegaming/roleplay-engine-sdk';
-
 import { SessionContext } from '../context/context';
 import { UIEventEmitter } from '../events/event-emitter';
 import { ScreenType } from '../screen/screen-type';
-import { ServerConfiguration } from '../server/server-configuration';
-import { TemplateLocalization } from '../screen/template-localization';
 
-import { ShellEvents } from './events/shell-events';
+import { ShellEvents, ShellInitializeScreen, ShellLocaleChanged } from './events/shell-events';
 import { UIEvents } from './events/ui-events';
 
 export class ShellBridge {
@@ -29,37 +22,13 @@ export class ShellBridge {
   }
 
   private onInitialize(event: Event) {
-    const customEvent = event as CustomEvent<{
-      screen: ScreenType;
-      context: SessionContext;
-      localization: {
-        [key: string]: TemplateTextTranslation;
-      };
-      templateConfiguration: Array<ServerTemplateConfiguration>;
-      serverConfiguration: ServerConfiguration;
-    }>;
-
-    return this.handleShellInitialize({
-      screen: customEvent.detail.screen,
-      context: customEvent.detail.context,
-      localization: customEvent.detail.localization,
-      templateConfiguration: customEvent.detail.templateConfiguration,
-      serverConfiguration: customEvent.detail.serverConfiguration,
-    });
+    const customEvent = event as CustomEvent<ShellInitializeScreen>;
+    return this.handleShellInitialize(customEvent.detail);
   }
 
   private onLocaleChanged(event: Event) {
-    const customEvent = event as CustomEvent<{
-      screen: ScreenType;
-      locale: string;
-      localization: TemplateLocalization;
-    }>;
-
-    return this.handleShellLocaleChanged({
-      screen: customEvent.detail.screen,
-      locale: customEvent.detail.locale,
-      localization: customEvent.detail.localization,
-    });
+    const customEvent = event as CustomEvent<ShellLocaleChanged>;
+    return this.handleShellLocaleChanged(customEvent.detail);
   }
 
   private onWindowMessage(event: MessageEvent) {
@@ -73,6 +42,8 @@ export class ShellBridge {
           localization: payload.localization,
           templateConfiguration: payload.templateConfiguration,
           serverConfiguration: payload.serverConfiguration,
+          locales: payload.locales,
+          defaultLocale: payload.defaultLocale,
         });
       case 'localeChanged':
         return this.handleShellLocaleChanged({
@@ -91,13 +62,9 @@ export class ShellBridge {
     localization,
     templateConfiguration,
     serverConfiguration,
-  }: {
-    screen: ScreenType;
-    context: SessionContext;
-    localization: TemplateLocalization;
-    templateConfiguration: Array<ServerTemplateConfiguration>;
-    serverConfiguration: ServerConfiguration;
-  }) {
+    locales,
+    defaultLocale,
+  }: ShellInitializeScreen) {
     if (screen !== this.screen) {
       return;
     }
@@ -106,34 +73,29 @@ export class ShellBridge {
     this.isInitialized = true;
     this.shellEmitter.emit('initializeScreen', {
       screen: this.screen,
-      context: this.sessionContext,
+      context,
       localization,
       templateConfiguration,
       serverConfiguration,
+      locales,
+      defaultLocale,
     });
   }
 
-  private handleShellLocaleChanged({
-    screen,
-    locale,
-    localization,
-  }: {
-    screen: ScreenType;
-    locale: string;
-    localization: TemplateLocalization;
-  }) {
-    if (screen !== this.screen) {
+  private handleShellLocaleChanged(event: ShellLocaleChanged) {
+    if (event.screen !== this.screen) {
       return;
     }
 
     if (this.sessionContext) {
-      this.sessionContext.locale = locale;
+      this.sessionContext.locale = event.locale;
     }
-    this.shellEmitter.emit('localeChanged', { screen, locale, localization });
+
+    this.shellEmitter.emit('localeChanged', event);
   }
 
   emitToShell<E extends keyof UIEvents>(event: E, payload: UIEvents[E]) {
-    const customEvent = new CustomEvent(`ui:${this.screen}:${String(event)}`, {
+    const customEvent = new CustomEvent(event, {
       detail: payload,
       bubbles: true,
       composed: true,

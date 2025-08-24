@@ -1,5 +1,6 @@
 import {
   EngineClient,
+  Locale,
   ServerTemplateConfiguration,
   TemplateTextTranslation,
 } from '@bitzonegaming/roleplay-engine-sdk';
@@ -32,6 +33,7 @@ export abstract class Screen<
   private _localization: TLocalization | undefined;
   private _templateConfiguration: TTemplateConfiguration | undefined;
   private _serverConfiguration: ServerConfiguration | undefined;
+  private _locales: Locale[] | undefined;
 
   protected constructor(protected readonly screen: ScreenType) {
     this.shellBridge = new ShellBridge(screen);
@@ -142,7 +144,7 @@ export abstract class Screen<
   }
 
   protected changeLocale(locale: string) {
-    this.shellBridge.emitToShell('localeChanged', { locale });
+    this.shellBridge.emitToShell('changeLocale', { fromScreen: this.screen, locale });
   }
 
   protected emitError(error: string, details?: unknown) {
@@ -185,9 +187,10 @@ export abstract class Screen<
     serverConfiguration: ServerConfiguration;
   }) {
     this._context = context;
-    this._engineClient = createEngineClient(context);
+    this._engineClient = createEngineClient(context, this.screen);
     this._gamemodeClient = createGamemodeClient(context);
     this._localization = localization as TLocalization;
+    this._serverConfiguration = serverConfiguration;
     this._templateConfiguration = templateConfiguration.reduce(
       (acc, config) => {
         acc[config.key] = config;
@@ -195,7 +198,6 @@ export abstract class Screen<
       },
       {} as Record<string, ServerTemplateConfiguration>,
     ) as TTemplateConfiguration;
-
     await this.onInit();
   }
 }

@@ -1,6 +1,7 @@
 import { EngineClient, SessionTokenAuthorization } from '@bitzonegaming/roleplay-engine-sdk';
 
 import { GamemodeClient } from '../../gamemode/client';
+import { ScreenType } from '../screen/screen-type';
 
 export interface SessionContext {
   templateId: string;
@@ -12,13 +13,13 @@ export interface SessionContext {
   locale: string;
 }
 
-export function createEngineClient(context: SessionContext) {
+export function createEngineClient(context: SessionContext, screen: ScreenType) {
   return new EngineClient(
     {
       serverId: context.serverId,
       apiUrl: context.engineApiUrl,
       locale: context.locale,
-      applicationName: `TEMPLATE:${context.templateId}`,
+      applicationName: `template:${context.templateId}:${screen}`,
     },
     new SessionTokenAuthorization(context.sessionId, context.sessionToken),
   );
