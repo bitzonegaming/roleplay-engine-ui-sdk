@@ -201,7 +201,7 @@ export abstract class Screen<
     this._locales = init.locales;
     this._defaultLocale = init.defaultLocale;
     this._templateConfiguration = init.templateConfiguration.reduce((acc, config) => {
-      acc[config.key] = {
+      acc[config.templateKey] = {
         type: config.type,
         value: config.value,
       } as TemplateConfig<ServerTemplateConfigType>;
