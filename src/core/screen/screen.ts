@@ -1,5 +1,7 @@
 import { EngineClient, Locale } from '@bitzonegaming/roleplay-engine-sdk';
-import { ServerTemplateConfigType } from '@bitzonegaming/roleplay-engine-sdk/template/models/server-template-config-type';
+import {
+  ServerTemplateConfigType
+} from '@bitzonegaming/roleplay-engine-sdk/template/models/server-template-config-type';
 
 import { createEngineClient, createGamemodeClient, SessionContext } from '../context/context';
 import { GamemodeClient } from '../../gamemode/client';
@@ -53,8 +55,8 @@ export abstract class Screen<
       await this.setup(init);
     });
 
-    this.onShell('localeChanged', ({ locale }) => {
-      return this.onLocaleChanged(locale);
+    this.onShell('localeChanged', ({ locale, localization }) => {
+      return this.onLocaleChanged({ locale, localization });
     });
 
     this.emitToShell('readyToInitialize', {
@@ -151,10 +153,16 @@ export abstract class Screen<
     this.eventEmitter.emit('init', { screen: this.screen });
   }
 
-  protected async onLocaleChanged(locale: string): Promise<void> {
+  protected async onLocaleChanged({
+    locale,
+    localization,
+  }: {
+    locale: string;
+    localization: TemplateTextLocalization;
+  }): Promise<void> {
     this._gamemodeClient?.changeLocale(locale);
     this._engineClient?.changeLocale(locale);
-    this.eventEmitter.emit('localeChanged', { locale });
+    this.eventEmitter.emit('localeChanged', { locale, localization });
   }
 
   protected changeLocale(locale: string) {
