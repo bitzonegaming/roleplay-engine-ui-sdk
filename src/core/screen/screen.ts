@@ -1,7 +1,4 @@
-import { EngineClient, Locale } from '@bitzonegaming/roleplay-engine-sdk';
-import {
-  ServerTemplateConfigType
-} from '@bitzonegaming/roleplay-engine-sdk/template/models/server-template-config-type';
+import { EngineClient, Locale, ServerTemplateConfigType } from '@bitzonegaming/roleplay-engine-sdk';
 
 import { createEngineClient, createGamemodeClient, SessionContext } from '../context/context';
 import { GamemodeClient } from '../../gamemode/client';
