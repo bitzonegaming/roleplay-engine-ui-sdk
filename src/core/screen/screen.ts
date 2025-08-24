@@ -1,15 +1,10 @@
-import {
-  EngineClient,
-  Locale,
-  ServerTemplateConfiguration,
-  TemplateTextTranslation,
-} from '@bitzonegaming/roleplay-engine-sdk';
+import { EngineClient, Locale, ServerTemplateConfiguration, } from '@bitzonegaming/roleplay-engine-sdk';
 
 import { createEngineClient, createGamemodeClient, SessionContext } from '../context/context';
 import { GamemodeClient } from '../../gamemode/client';
 import { ShellBridge } from '../shell/shell-bridge';
 import { EventListener, UIEventEmitter } from '../events/event-emitter';
-import { ShellEvents } from '../shell/events/shell-events';
+import { ShellEvents, ShellInitializeScreen } from '../shell/events/shell-events';
 import { UIEvents } from '../shell/events/ui-events';
 import { ToasterScreenNotification } from '../../screens/toaster/screen';
 import { ServerConfiguration } from '../server/server-configuration';
@@ -34,6 +29,7 @@ export abstract class Screen<
   private _templateConfiguration: TTemplateConfiguration | undefined;
   private _serverConfiguration: ServerConfiguration | undefined;
   private _locales: Locale[] | undefined;
+  private _defaultLocale: string | undefined;
 
   protected constructor(protected readonly screen: ScreenType) {
     this.shellBridge = new ShellBridge(screen);
@@ -41,17 +37,9 @@ export abstract class Screen<
   }
 
   public readyToInitialize() {
-    this.onShell(
-      'initializeScreen',
-      async ({ context, localization, templateConfiguration, serverConfiguration }) => {
-        await this.setup({
-          context,
-          localization,
-          templateConfiguration,
-          serverConfiguration,
-        });
-      },
-    );
+    this.onShell('initializeScreen', async (init: ShellInitializeScreen) => {
+      await this.setup(init);
+    });
 
     this.onShell('localeChanged', ({ locale }) => {
       return this.onLocaleChanged(locale);
@@ -106,6 +94,20 @@ export abstract class Screen<
       throw new Error('Screen is not initialized');
     }
     return this._serverConfiguration;
+  }
+
+  public get defaultLocale(): string {
+    if (!this._defaultLocale) {
+      throw new Error('Screen is not initialized');
+    }
+    return this._defaultLocale;
+  }
+
+  public get locales(): Locale[] {
+    if (!this._locales) {
+      throw new Error('Screen is not initialized');
+    }
+    return this._locales;
   }
 
   protected emit<E extends keyof TEvents>(event: E, payload: TEvents[E]): boolean {
@@ -173,25 +175,15 @@ export abstract class Screen<
     return this.shellBridge.emitToShell(event, payload);
   }
 
-  private async setup({
-    context,
-    localization,
-    templateConfiguration,
-    serverConfiguration,
-  }: {
-    context: SessionContext;
-    localization: {
-      [key: string]: TemplateTextTranslation;
-    };
-    templateConfiguration: Array<ServerTemplateConfiguration>;
-    serverConfiguration: ServerConfiguration;
-  }) {
-    this._context = context;
-    this._engineClient = createEngineClient(context, this.screen);
-    this._gamemodeClient = createGamemodeClient(context);
-    this._localization = localization as TLocalization;
-    this._serverConfiguration = serverConfiguration;
-    this._templateConfiguration = templateConfiguration.reduce(
+  private async setup(init: ShellInitializeScreen) {
+    this._context = init.context;
+    this._engineClient = createEngineClient(init.context, this.screen);
+    this._gamemodeClient = createGamemodeClient(init.context);
+    this._localization = init.localization as TLocalization;
+    this._serverConfiguration = init.serverConfiguration;
+    this._locales = init.locales;
+    this._defaultLocale = init.defaultLocale;
+    this._templateConfiguration = init.templateConfiguration.reduce(
       (acc, config) => {
         acc[config.key] = config;
         return acc;

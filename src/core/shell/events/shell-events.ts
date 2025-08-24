@@ -1,6 +1,4 @@
-import {
-  ServerTemplateConfiguration
-} from '@bitzonegaming/roleplay-engine-sdk/template/models/server-template-configuration';
+import { ServerTemplateConfiguration } from '@bitzonegaming/roleplay-engine-sdk/template/models/server-template-configuration';
 import { Locale } from '@bitzonegaming/roleplay-engine-sdk';
 
 import { SessionContext } from '../../context/context';

@@ -1,4 +1,4 @@
-import { EventEmitter as NodeEventEmitter } from 'events';
+import { EventEmitter } from 'events';
 
 /** Event listener function that can be sync or async */
 export type EventListener<T> = (payload: T) => void | Promise<void>;
@@ -6,12 +6,12 @@ export type EventListener<T> = (payload: T) => void | Promise<void>;
 export type ErrorHandler = (error: Error, event: string, payload: unknown) => void;
 
 /**
- * Type-safe event emitter wrapper around Node.js EventEmitter
+ * Type-safe event emitter wrapper for browser and Node.js environments
  *
  * Provides automatic async error handling and type-safe event emission
  */
 export class UIEventEmitter<Events> {
-  private emitter = new NodeEventEmitter();
+  private emitter = new EventEmitter();
   private errorHandler?: ErrorHandler;
 
   /**
