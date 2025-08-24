@@ -5,7 +5,7 @@ import { SessionContext } from '../../context/context';
 import { ScreenNotification } from '../../screen/screen-notification';
 import { ScreenType } from '../../screen/screen-type';
 import { ServerConfiguration } from '../../server/server-configuration';
-import { TemplateLocalization } from '../../screen/template-localization';
+import { TemplateTextLocalization } from '../../screen/template-localization';
 
 export interface ShellEvents {
   initializeScreen: ShellInitializeScreen;
@@ -16,13 +16,13 @@ export interface ShellEvents {
 export interface ShellLocaleChanged {
   screen: ScreenType;
   locale: string;
-  localization: TemplateLocalization;
+  localization: TemplateTextLocalization;
 }
 
 export interface ShellInitializeScreen {
   screen: ScreenType;
   context: SessionContext;
-  localization: TemplateLocalization;
+  localization: TemplateTextLocalization;
   templateConfiguration: Array<ServerTemplateConfiguration>;
   serverConfiguration: ServerConfiguration;
   locales: Locale[];

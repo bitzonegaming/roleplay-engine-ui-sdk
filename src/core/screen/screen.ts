@@ -11,12 +11,20 @@ import { ServerConfiguration } from '../server/server-configuration';
 
 import { ScreenEvents } from './events/events';
 import { ScreenType } from './screen-type';
-import { TemplateLocalization } from './template-localization';
+import { TemplateLocalization, TemplateTextLocalization } from './template-localization';
 import { TemplateConfiguration } from './template-configuration';
+
+export interface ScreenSettings<
+  TLocalization extends TemplateTextLocalization,
+  TTemplateConfiguration extends TemplateConfiguration,
+> {
+  localization: TemplateLocalization<TLocalization, TTemplateConfiguration>;
+  configuration: TTemplateConfiguration;
+}
 
 export abstract class Screen<
   TEvents extends ScreenEvents,
-  TLocalization extends TemplateLocalization,
+  TLocalization extends TemplateTextLocalization,
   TTemplateConfiguration extends TemplateConfiguration,
 > {
   private readonly shellBridge: ShellBridge;
@@ -31,7 +39,10 @@ export abstract class Screen<
   private _locales: Locale[] | undefined;
   private _defaultLocale: string | undefined;
 
-  protected constructor(protected readonly screen: ScreenType) {
+  protected constructor(
+    protected readonly screen: ScreenType,
+    protected readonly defaultSettings: ScreenSettings<TLocalization, TTemplateConfiguration>,
+  ) {
     this.shellBridge = new ShellBridge(screen);
     this.eventEmitter = new UIEventEmitter<TEvents>();
   }

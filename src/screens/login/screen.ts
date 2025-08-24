@@ -9,10 +9,10 @@ import {
   RegisterAccountRequest,
 } from '@bitzonegaming/roleplay-engine-sdk';
 
-import { Screen } from '../../core/screen/screen';
+import { Screen, ScreenSettings } from '../../core/screen/screen';
 import { ScreenType } from '../../core/screen/screen-type';
 import { ScreenEvents } from '../../core/screen/events/events';
-import { TemplateLocalization } from '../../core/screen/template-localization';
+import { TemplateTextLocalization } from '../../core/screen/template-localization';
 import { TemplateConfiguration } from '../../core/screen/template-configuration';
 import { GamemodeAccountApi } from '../../gamemode/account/api';
 import { ImplicitDiscordAuthApiRequest } from '../../gamemode/account/request/implicit-discord-auth.api-request';
@@ -25,14 +25,14 @@ export type LoginScreenNotification = { screen: ScreenType.Login };
 export type LoginScreenEvents = ScreenEvents;
 
 export class LoginScreen<
-  TLocalization extends TemplateLocalization,
+  TLocalization extends TemplateTextLocalization,
   TConfiguration extends TemplateConfiguration,
 > extends Screen<LoginScreenEvents, TLocalization, TConfiguration> {
   private _configuration: LoginScreenConfiguration | undefined;
   private _accountApi: GamemodeAccountApi | undefined;
 
-  constructor() {
-    super(ScreenType.Login);
+  constructor(defaultSettings: ScreenSettings<TLocalization, TConfiguration>) {
+    super(ScreenType.Login, defaultSettings);
   }
 
   protected async onInit(): Promise<void> {
