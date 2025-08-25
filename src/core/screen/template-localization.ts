@@ -3,7 +3,7 @@ import { TemplateConfigTranslation } from '@bitzonegaming/roleplay-engine-sdk/lo
 
 import { TemplateConfiguration } from './template-configuration';
 
-export interface TemplateLocalization<
+export interface TemplateLocalizationSettings<
   ITemplateLocalization extends TemplateTextLocalization,
   ITemplateConfiguration extends TemplateConfiguration,
 > {

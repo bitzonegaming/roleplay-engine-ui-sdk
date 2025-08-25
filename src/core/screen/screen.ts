@@ -16,15 +16,15 @@ import { ServerConfiguration } from '../server/server-configuration';
 
 import { ScreenEvents } from './events/events';
 import { ScreenType } from './screen-type';
-import { TemplateLocalization, TemplateTextLocalization } from './template-localization';
-import { TemplateConfig, TemplateConfiguration } from './template-configuration';
+import { TemplateLocalizationSettings, TemplateTextLocalization } from './template-localization';
+import { TemplateConfig, TemplateConfiguration, TemplateConfigurationSettings, } from './template-configuration';
 
 export interface ScreenSettings<
   TLocalization extends TemplateTextLocalization,
   TTemplateConfiguration extends TemplateConfiguration,
 > {
-  localization: TemplateLocalization<TLocalization, TTemplateConfiguration>;
-  configuration: TTemplateConfiguration;
+  localization: TemplateLocalizationSettings<TLocalization, TTemplateConfiguration>;
+  configuration: TemplateConfigurationSettings<TTemplateConfiguration>;
 }
 
 export abstract class Screen<
