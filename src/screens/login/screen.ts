@@ -28,8 +28,6 @@ import { GamemodeSessionApi } from '../../gamemode/session/api';
 
 import { LoginScreenConfiguration } from './configuration';
 
-export type LoginScreenNotification = { screen: ScreenType.Login };
-
 export type LoginScreenEvents = ScreenEvents;
 
 export class LoginScreen<

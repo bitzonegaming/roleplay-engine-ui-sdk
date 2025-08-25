@@ -3,6 +3,7 @@ import {
   Locale,
   ServerTemplateConfigType,
   ServerTemplateConfiguration,
+  TemplateCategory,
 } from '@bitzonegaming/roleplay-engine-sdk';
 
 import { createEngineClient, createGamemodeClient, SessionContext } from '../context/context';
@@ -11,13 +12,18 @@ import { ShellBridge } from '../shell/shell-bridge';
 import { EventListener, UIEventEmitter } from '../events/event-emitter';
 import { ShellEvents, ShellInitializeScreen } from '../shell/events/shell-events';
 import { UIEvents } from '../shell/events/ui-events';
-import { ToasterScreenNotification } from '../../screens/toaster/screen';
+import { Toast } from '../../screens/toaster/screen';
 import { ServerConfiguration } from '../server/server-configuration';
 
 import { ScreenEvents } from './events/events';
 import { ScreenType } from './screen-type';
 import { TemplateLocalizationSettings, TemplateTextLocalization } from './template-localization';
-import { TemplateConfig, TemplateConfiguration, TemplateConfigurationSettings, } from './template-configuration';
+import {
+  TemplateConfig,
+  TemplateConfiguration,
+  TemplateConfigurationSettings,
+} from './template-configuration';
+import { ScreenNotification } from './screen-notification';
 
 export interface ScreenSettings<
   TLocalization extends TemplateTextLocalization,
@@ -61,6 +67,10 @@ export abstract class Screen<
       return this.onLocaleChanged({ locale, localization });
     });
 
+    this.onShell('notification', (notification) => {
+      return this.onNotification(notification);
+    });
+
     this.emitToShell('readyToInitialize', {
       screen: this.screen,
     });
@@ -87,8 +97,12 @@ export abstract class Screen<
     return this;
   }
 
-  public toast(notification: ToasterScreenNotification) {
-    this.shellBridge.emitToShell('notifyScreen', notification);
+  public toast(notification: Toast) {
+    this.shellBridge.emitToShell('notifyScreen', {
+      screen: TemplateCategory.Toaster,
+      type: 'toast',
+      data: notification,
+    });
   }
 
   public get localization(): TLocalization {
@@ -221,8 +235,15 @@ export abstract class Screen<
     this._locales = init.locales;
     this._defaultLocale = init.defaultLocale;
     this._templateConfiguration = this.mapTemplateConfiguration(init.templateConfiguration);
-
     await this.onInit();
+  }
+
+  private onNotification(notification: ScreenNotification) {
+    if (notification.screen !== this.screen) {
+      return;
+    }
+
+    this.emit(notification.type as keyof TEvents, notification.data as TEvents[keyof TEvents]);
   }
 
   private mapTemplateConfiguration(configuration: Array<ServerTemplateConfiguration>) {
