@@ -66,7 +66,7 @@ export class GamemodeAccountApi {
     request: ExternalLoginPreAuthRequest,
   ): Promise<ExternalLoginPreAuthResult> {
     return this.client.post<ExternalLoginPreAuthRequest, ExternalLoginPreAuthResult>({
-      url: `external-login/pre-auth`,
+      url: `accounts/external-login/pre-auth`,
       data: request,
     });
   }
@@ -83,7 +83,7 @@ export class GamemodeAccountApi {
    */
   public authExternalLogin(request: ExternalLoginAuthRequest): Promise<GrantAccessResult> {
     return this.client.post<ExternalLoginAuthRequest, GrantAccessResult>({
-      url: `external-login/auth`,
+      url: `accounts/external-login/auth`,
       data: request,
     });
   }
@@ -99,7 +99,7 @@ export class GamemodeAccountApi {
    */
   public getDiscordUser(): Promise<DiscordUserAccountInfo> {
     return this.client.get<DiscordUserAccountInfo>({
-      url: `discord`,
+      url: `accounts/discord`,
     });
   }
 
@@ -117,7 +117,7 @@ export class GamemodeAccountApi {
     request: ImplicitDiscordAuthApiRequest,
   ): Promise<GrantAccessResult> {
     return this.client.post<ImplicitDiscordAuthApiRequest, GrantAccessResult>({
-      url: `discord/auth`,
+      url: `accounts/discord/auth`,
       data: request,
     });
   }
@@ -133,7 +133,7 @@ export class GamemodeAccountApi {
    */
   public getDiscordOAuthAuthorizeUrl(): Promise<RedirectUri> {
     return this.client.get<RedirectUri>({
-      url: `discord/oauth/authorize`,
+      url: `accounts/discord/oauth/authorize`,
     });
   }
 
@@ -149,7 +149,7 @@ export class GamemodeAccountApi {
    */
   public authDiscordOAuthFlow(request: DiscordOAuthTokenApiRequest): Promise<GrantAccessResult> {
     return this.client.post<DiscordOAuthTokenApiRequest, GrantAccessResult>({
-      url: `discord/oauth/token`,
+      url: `accounts/discord/oauth/token`,
       data: request,
     });
   }
