@@ -1,4 +1,9 @@
-import { EngineClient, Locale, ServerTemplateConfigType } from '@bitzonegaming/roleplay-engine-sdk';
+import {
+  EngineClient,
+  Locale,
+  ServerTemplateConfigType,
+  ServerTemplateConfiguration,
+} from '@bitzonegaming/roleplay-engine-sdk';
 
 import { createEngineClient, createGamemodeClient, SessionContext } from '../context/context';
 import { GamemodeClient } from '../../gamemode/client';
@@ -41,7 +46,7 @@ export abstract class Screen<
 
   protected constructor(
     protected readonly screen: ScreenType,
-    protected readonly defaultSettings: ScreenSettings<TLocalization, TTemplateConfiguration>,
+    private readonly defaultSettings: ScreenSettings<TLocalization, TTemplateConfiguration>,
   ) {
     this.shellBridge = new ShellBridge(screen);
     this.eventEmitter = new UIEventEmitter<TEvents>();
@@ -159,7 +164,8 @@ export abstract class Screen<
   }): Promise<void> {
     this._gamemodeClient?.changeLocale(locale);
     this._engineClient?.changeLocale(locale);
-    this.eventEmitter.emit('localeChanged', { locale, localization });
+    this._localization = this.mapTemplateLocalization(localization as TLocalization);
+    this.eventEmitter.emit('localeChanged', { locale, localization: this._localization });
   }
 
   protected changeLocale(locale: string) {
@@ -196,17 +202,54 @@ export abstract class Screen<
     this._context = init.context;
     this._engineClient = createEngineClient(init.context, this.screen);
     this._gamemodeClient = createGamemodeClient(init.context);
-    this._localization = init.localization as TLocalization;
+    this._localization = this.mapTemplateLocalization(init.localization as TLocalization);
     this._serverConfiguration = init.serverConfiguration;
     this._locales = init.locales;
     this._defaultLocale = init.defaultLocale;
-    this._templateConfiguration = init.templateConfiguration.reduce((acc, config) => {
+    this._templateConfiguration = this.mapTemplateConfiguration(init.templateConfiguration);
+
+    await this.onInit();
+  }
+
+  private mapTemplateConfiguration(configuration: Array<ServerTemplateConfiguration>) {
+    let templateConfiguration = configuration.reduce((acc, config) => {
       acc[config.templateKey] = {
         type: config.type,
         value: config.value,
       } as TemplateConfig<ServerTemplateConfigType>;
       return acc;
     }, {} as TemplateConfiguration) as TTemplateConfiguration;
-    await this.onInit();
+
+    templateConfiguration = {
+      ...templateConfiguration,
+      ...(Object.keys(this.defaultSettings.configuration)
+        .filter((key) => !templateConfiguration[key])
+        .reduce((acc, key) => {
+          const config = this.defaultSettings.configuration[key];
+          acc[key] = {
+            type: config.type,
+            value: config.value,
+          } as TemplateConfig<ServerTemplateConfigType>;
+          return acc;
+        }, {} as TemplateConfiguration) as TTemplateConfiguration),
+    };
+    return templateConfiguration;
+  }
+
+  private mapTemplateLocalization(localization: TLocalization): TLocalization {
+    let templateLocalization = localization;
+    if (!this.defaultSettings.localization[this.context.locale]) {
+      return templateLocalization;
+    }
+    templateLocalization = {
+      ...templateLocalization,
+      ...(Object.keys(this.defaultSettings.localization[this.context.locale].TEXTS)
+        .filter((key) => !templateLocalization[key])
+        .reduce((acc, key) => {
+          acc[key] = this.defaultSettings.localization[this.context.locale].TEXTS[key];
+          return acc;
+        }, {} as TemplateTextLocalization) as TLocalization),
+    };
+    return templateLocalization;
   }
 }

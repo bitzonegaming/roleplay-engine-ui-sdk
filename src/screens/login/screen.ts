@@ -4,9 +4,12 @@ import {
   DiscordUserAccountInfo,
   ExternalLoginAuthRequest,
   ExternalLoginIdentifierType,
+  ForgotPasswordRequest,
   GrantAccessResult,
+  PublicApi,
   RedirectUri,
   RegisterAccountRequest,
+  ResendEmailVerificationRequest,
 } from '@bitzonegaming/roleplay-engine-sdk';
 
 import { Screen, ScreenSettings } from '../../core/screen/screen';
@@ -29,7 +32,8 @@ export class LoginScreen<
   TConfiguration extends TemplateConfiguration,
 > extends Screen<LoginScreenEvents, TLocalization, TConfiguration> {
   private _configuration: LoginScreenConfiguration | undefined;
-  private _accountApi: GamemodeAccountApi | undefined;
+  private _gamemodeAccountApi: GamemodeAccountApi | undefined;
+  private _enginePublicApi: PublicApi | undefined;
 
   constructor(defaultSettings: ScreenSettings<TLocalization, TConfiguration>) {
     super(ScreenType.Login, defaultSettings);
@@ -37,7 +41,8 @@ export class LoginScreen<
 
   protected async onInit(): Promise<void> {
     this._configuration = this.mapConfiguration();
-    this._accountApi = new GamemodeAccountApi(this.gamemodeClient);
+    this._gamemodeAccountApi = new GamemodeAccountApi(this.gamemodeClient);
+    this._enginePublicApi = new PublicApi(this.engineClient);
     return super.onInit();
   }
 
@@ -50,33 +55,41 @@ export class LoginScreen<
   }
 
   public register(request: RegisterAccountRequest): Promise<Account> {
-    return this.accountApi.register(request);
+    return this.gamemodeAccountApi.register(request);
   }
 
   public authWithPassword(request: AccountAuthRequest): Promise<GrantAccessResult> {
-    return this.accountApi.authWithPassword(request);
+    return this.gamemodeAccountApi.authWithPassword(request);
   }
 
   public authExternalLogin(request: ExternalLoginAuthRequest): Promise<GrantAccessResult> {
-    return this.accountApi.authExternalLogin(request);
+    return this.gamemodeAccountApi.authExternalLogin(request);
   }
 
   public authDiscordImplicitFlow(
     request: ImplicitDiscordAuthApiRequest,
   ): Promise<GrantAccessResult> {
-    return this.accountApi.authDiscordImplicitFlow(request);
+    return this.gamemodeAccountApi.authDiscordImplicitFlow(request);
   }
 
   public authDiscordOAuthFlow(request: DiscordOAuthTokenApiRequest): Promise<GrantAccessResult> {
-    return this.accountApi.authDiscordOAuthFlow(request);
+    return this.gamemodeAccountApi.authDiscordOAuthFlow(request);
   }
 
   public getDiscordOAuthAuthorizeUrl(): Promise<RedirectUri> {
-    return this.accountApi.getDiscordOAuthAuthorizeUrl();
+    return this.gamemodeAccountApi.getDiscordOAuthAuthorizeUrl();
   }
 
   public getDiscordUser(): Promise<DiscordUserAccountInfo> {
-    return this.accountApi.getDiscordUser();
+    return this.gamemodeAccountApi.getDiscordUser();
+  }
+
+  public forgotPassword(request: ForgotPasswordRequest) {
+    return this.enginePublicApi.forgotPassword(request);
+  }
+
+  public resendEmailVerification(request: ResendEmailVerificationRequest) {
+    return this.enginePublicApi.resendEmailVerification(request);
   }
 
   private mapConfiguration(): LoginScreenConfiguration {
@@ -122,10 +135,17 @@ export class LoginScreen<
     return configuration;
   }
 
-  private get accountApi(): GamemodeAccountApi {
-    if (!this._accountApi) {
+  private get gamemodeAccountApi(): GamemodeAccountApi {
+    if (!this._gamemodeAccountApi) {
       throw new Error('Screen is not initialized');
     }
-    return this._accountApi;
+    return this._gamemodeAccountApi;
+  }
+
+  private get enginePublicApi(): PublicApi {
+    if (!this._enginePublicApi) {
+      throw new Error('Screen is not initialized');
+    }
+    return this._enginePublicApi;
   }
 }
