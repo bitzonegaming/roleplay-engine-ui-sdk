@@ -130,6 +130,20 @@ export abstract class Screen<
     return this.eventEmitter.emit(event, payload);
   }
 
+  public formatMessage = (key: keyof TLocalization, params?: Record<string, string>): string => {
+    const localization = this.localization[key];
+    if (!localization) return key as string;
+
+    let message = localization.message;
+    if (params) {
+      Object.keys(params).forEach((key: string) => {
+        message = message.replace(`\${${key}}`, params[key]);
+      });
+    }
+
+    return message;
+  };
+
   protected get engineClient(): EngineClient {
     if (!this._engineClient) {
       throw new Error('Screen is not initialized');
