@@ -16,7 +16,7 @@ export class GamemodeSessionApi {
    * @throws EngineError when session is already authorized
    */
   public async authorizeSession(request: AuthorizeSessionRequest): Promise<SessionInfo> {
-    return this.client.post<AuthorizeSessionRequest, SessionInfo>({
+    return this.client.put<AuthorizeSessionRequest, SessionInfo>({
       url: `sessions/auth`,
       data: request,
     });
