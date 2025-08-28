@@ -1,4 +1,6 @@
-import { ServerTemplateConfiguration } from '@bitzonegaming/roleplay-engine-sdk/template/models/server-template-configuration';
+import {
+  ServerTemplateConfiguration
+} from '@bitzonegaming/roleplay-engine-sdk/template/models/server-template-configuration';
 import { Locale } from '@bitzonegaming/roleplay-engine-sdk';
 
 import { SessionContext } from '../../context/context';
@@ -8,9 +10,9 @@ import { ServerConfiguration } from '../../server/server-configuration';
 import { TemplateTextLocalization } from '../../screen/template-localization';
 
 export interface ShellEvents {
-  initializeScreen: ShellInitializeScreen;
-  localeChanged: ShellLocaleChanged;
-  notification: ScreenNotification;
+  'shell:initializeScreen': ShellInitializeScreen;
+  'shell:localeChanged': ShellLocaleChanged;
+  'shell:notification': ScreenNotification;
 }
 
 export interface ShellLocaleChanged {

@@ -16,9 +16,8 @@ export class ShellBridge {
   }
 
   private setupEventListeners() {
-    window.addEventListener('initializeScreen', this.onInitialize.bind(this));
-    window.addEventListener('localeChanged', this.onLocaleChanged.bind(this));
-    window.addEventListener('message', this.onWindowMessage.bind(this));
+    window.addEventListener('shell:initializeScreen', this.onInitialize.bind(this));
+    window.addEventListener('shell:localeChanged', this.onLocaleChanged.bind(this));
   }
 
   private onInitialize(event: Event) {
@@ -29,31 +28,6 @@ export class ShellBridge {
   private onLocaleChanged(event: Event) {
     const customEvent = event as CustomEvent<ShellLocaleChanged>;
     return this.handleShellLocaleChanged(customEvent.detail);
-  }
-
-  private onWindowMessage(event: MessageEvent) {
-    const { type, payload } = event.data;
-
-    switch (type) {
-      case 'initializeScreen':
-        return this.handleShellInitialize({
-          screen: payload.screen,
-          context: payload.context,
-          localization: payload.localization,
-          templateConfiguration: payload.templateConfiguration,
-          serverConfiguration: payload.serverConfiguration,
-          locales: payload.locales,
-          defaultLocale: payload.defaultLocale,
-        });
-      case 'localeChanged':
-        return this.handleShellLocaleChanged({
-          screen: payload.screen,
-          locale: payload.locale,
-          localization: payload.localization,
-        });
-      default:
-        this.shellEmitter.emit(type, payload);
-    }
   }
 
   private handleShellInitialize({
@@ -71,7 +45,7 @@ export class ShellBridge {
 
     this.sessionContext = context;
     this.isInitialized = true;
-    this.shellEmitter.emit('initializeScreen', {
+    this.shellEmitter.emit('shell:initializeScreen', {
       screen: this.screen,
       context,
       localization,
@@ -91,7 +65,7 @@ export class ShellBridge {
       this.sessionContext.locale = event.locale;
     }
 
-    this.shellEmitter.emit('localeChanged', event);
+    this.shellEmitter.emit('shell:localeChanged', event);
   }
 
   emitToShell<E extends keyof UIEvents>(event: E, payload: UIEvents[E]) {
@@ -133,7 +107,7 @@ export class ShellBridge {
     }
 
     return new Promise((resolve) => {
-      this.shellEmitter.once('initializeScreen', ({ context }) => {
+      this.shellEmitter.once('shell:initializeScreen', ({ context }) => {
         resolve(context);
       });
     });

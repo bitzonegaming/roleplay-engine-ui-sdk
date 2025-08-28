@@ -59,19 +59,19 @@ export abstract class Screen<
   }
 
   public readyToInitialize() {
-    this.onShell('initializeScreen', async (init: ShellInitializeScreen) => {
+    this.onShell('shell:initializeScreen', async (init: ShellInitializeScreen) => {
       await this.setup(init);
     });
 
-    this.onShell('localeChanged', ({ locale, localization }) => {
+    this.onShell('shell:localeChanged', ({ locale, localization }) => {
       return this.onLocaleChanged({ locale, localization });
     });
 
-    this.onShell('notification', (notification) => {
+    this.onShell('shell:notification', (notification) => {
       return this.onNotification(notification);
     });
 
-    this.emitToShell('readyToInitialize', {
+    this.emitToShell('screen:readyToInitialize', {
       screen: this.screen,
     });
   }
@@ -81,7 +81,7 @@ export abstract class Screen<
       throw new Error('Screen is not initialized');
     }
 
-    this.emitToShell('initialized', {
+    this.emitToShell('screen:initialized', {
       screen: ScreenType.Login,
       templateId: this._context.templateId,
     });
@@ -98,7 +98,7 @@ export abstract class Screen<
   }
 
   public toast(notification: Toast) {
-    this.shellBridge.emitToShell('notifyScreen', {
+    this.shellBridge.emitToShell('screen:notifyScreen', {
       screen: TemplateCategory.Toaster,
       type: 'toast',
       data: notification,
@@ -197,15 +197,19 @@ export abstract class Screen<
   }
 
   protected changeLocale(locale: string) {
-    this.shellBridge.emitToShell('changeLocale', { fromScreen: this.screen, locale });
+    this.shellBridge.emitToShell('screen:changeLocale', { fromScreen: this.screen, locale });
   }
 
   protected emitError(error: string, details?: unknown) {
-    this.shellBridge.emitToShell('error', { error, details });
+    this.shellBridge.emitToShell('screen:error', { error, details });
   }
 
   protected navigateToScreen(toScreen: ScreenType, params?: unknown) {
-    this.shellBridge.emitToShell('navigation', { fromScreen: this.screen, toScreen, params });
+    this.shellBridge.emitToShell('screen:navigation', {
+      fromScreen: this.screen,
+      toScreen,
+      params,
+    });
   }
 
   protected onShell<E extends keyof ShellEvents>(
