@@ -93,9 +93,19 @@ export class LoginScreen<
 
   public async authDiscordImplicitFlow(
     request: ImplicitDiscordAuthApiRequest,
-  ): Promise<SessionInfo> {
-    const result = await this.gamemodeAccountApi.authDiscordImplicitFlow(request);
-    return this.authorizeSession(result);
+    onEmailVerificationPending: () => void | Promise<void>,
+  ): Promise<SessionInfo | undefined> {
+    try {
+      const result = await this.gamemodeAccountApi.authDiscordImplicitFlow(request);
+      return await this.authorizeSession(result);
+    } catch (err) {
+      if (this.handleEmailVerificationRequiredError(err as Error)) {
+        onEmailVerificationPending();
+        return;
+      }
+
+      throw err;
+    }
   }
 
   public async authDiscordOAuthFlow(request: DiscordOAuthTokenApiRequest): Promise<SessionInfo> {
